@@ -33,15 +33,17 @@ if (!isset($last_bets)) {
 }
 
 $win_ids = array_column($last_bets, 'user_id');
-foreach ($lot_ids as $key => $lot_id) {
+if (!empty($win_ids)) {
+    foreach ($lot_ids as $key => $lot_id) {
 
-    $is_update = update_lot($connect, [$win_ids[$key], $lot_id]);
+        $is_update = update_lot($connect, [$win_ids[$key], $lot_id]);
 
-    if (!$is_update) {
-        exit();
+        if (!$is_update) {
+            exit();
+        }
+
+        $user = get_user_by_id($connect, (int)$win_ids[$key]);
+        $lot = get_lot_by_id($connect, $lot_id);
+        sent_mail($user['email'], $user['user_name'], $lot['id'], $lot['lot_name']);
     }
-
-    $user = get_user_by_id($connect, $win_ids[$key]);
-    $lot = get_lot_by_id($connect, $lot_id);
-    sent_mail($user['email'], $user['user_name'], $lot['id'], $lot['lot_name']);
 }
